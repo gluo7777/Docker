@@ -16,9 +16,10 @@ def hello():
     except RedisError:
         visits = "<i>cannot connect to Redis, counter disabled</i>"
 
-    html = "<h3>Hello {name}!</h3>" \
-           "<b>Hostname:</b> {hostname}<br/>" \
-           "<b>Visits:</b> {visits}"
+    html = "<h1>Hello This webpage is powered by Python 2. </h1>" \
+        "<h3>Hello {name}!</h3>" \
+        "<b>Hostname:</b> {hostname}<br/>" \
+        "<b>Visits:</b> {visits}"
     # Accessing the name of the host when inside a container retrieves the container ID, which is like the process ID for a running executable.
     return html.format(name=os.getenv("NAME", "world"), hostname=socket.gethostname(), visits=visits)
 
