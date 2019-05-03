@@ -1,14 +1,15 @@
-- Stack
-    - Swarm
-        - node
-            - manager
-            - worker
-            - Container
+- Swarm
+    - Stack
+    - node
+        - manager
+        - worker
+        - Container
 
 # Development
 # Package App Source Code
 # Build Image
 - Create Dockerfile and place in directory with all source code
+- Visit https://hub.docker.com to find images.
 - Create docker-compose.yml
 - Build Image: `docker build -t pyapp9821:v1.2.0 .` in Dockerfile directory
 - (Optional) Tag latest: `docker tag pyapp9821:v1.2.0 username/repository:latest`

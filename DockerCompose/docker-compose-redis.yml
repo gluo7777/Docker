@@ -1,0 +1,59 @@
+version: "3"
+services:
+  # Run 5 instances of that image as a service called web, 
+  # limiting each one to use, at most, 10% of a single core of 
+  # CPU time (this could also be e.g. “1.5” to mean 1 and half core for each), and 50MB of RAM.
+  web:
+    # replace username/repo:tag with your name and image details
+    image: willdocker9821/pyapp9821
+    deploy:
+      replicas: 6
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+      # Immediately restart containers if one fails.
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "4000:80"
+    # Instruct web’s containers to share port 80 via a load-balanced network called webnet. 
+    # (Internally, the containers themselves publish to web’s port 80 at an ephemeral port.)
+    networks:
+      - webnet
+  # add a free visualizer service that lets us look at how our swarm is scheduling containers.
+  # this container, built from an open source project created by Docker, displays Docker services running on a swarm in a diagram.
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    # giving the visualizer access to the host’s socket file for Docker
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        # ensuring that this service only ever runs on a swarm manager -- never a worker.
+        constraints: [node.role == manager]
+    networks:
+      - webnet
+  # Redis has an official image in the Docker library and has been granted the short image name of just redis, so no username/repo notation here. The Redis port, 6379, has been pre-configured by Redis to be exposed from the container to the host, and here in our Compose file we expose it from the host to the world, so you can actually enter the IP for any of your nodes into Redis Desktop Manager and manage this Redis instance, if you so choose.
+  # https://hub.docker.com/_/redis
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      # redis accesses an arbitrary directory in the host’s file system as /data inside the container, which is where Redis stores data.
+      # prerequisites: run docker-machine ssh myvm1 "mkdir ./data" on manager
+      # note: DO NOT use local shell to create directory, this will NOT create directory on VM
+      - "/home/docker/data:/data"
+    deploy:
+      placement:
+        # redis always runs on the manager, so it’s always using the same filesystem.
+        # ensures that redis always uses the same host.
+        constraints: [node.role == manager]
+    command: redis-server --appendonly yes
+    networks:
+      - webnet
+networks:
+  webnet:
